@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	// this allows us to run our web server
 	"github.com/gin-gonic/gin"
@@ -58,10 +57,7 @@ func main() {
 	router.GET("/query1", func(c *gin.Context) {
 		table := "<table class='table'><thead><tr>"
 		// put your query here
-		rows, err := db.Query("SELECT caddie.first_name, caddie.last_name FROM Tournament
-							   JOIN Player ON winnerId = player.playerId
-							   JOIN Caddie on Player.caddieId = caddie.caddieId
-							   WHERE Tournament.name = 'ThePlayers';") // <--- EDIT THIS LINE
+		rows, err := db.Query("SELECT caddie.first_name, caddie.last_name FROM Tournament JOIN Player ON winnerId = player.playerId JOIN Caddie on Player.caddieId = caddie.caddieId WHERE Tournament.name = 'The Players';") // <--- EDIT THIS LINE
 		if err != nil {
 			// careful about returning errors to the user!
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -77,14 +73,14 @@ func main() {
 		// once you've added all the columns in, close the header
 		table += "</thead><tbody>"
 		// declare all your RETURNED columns here
-		var id int      // <--- EDIT THESE LINES
-		var name string //<--- ^^^^
+		var first_name string      // <--- EDIT THESE LINES
+		var last_name string //<--- ^^^^
 		for rows.Next() {
 			// assign each of them, in order, to the parameters of rows.Scan.
 			// preface each variable with &
-			rows.Scan(&id, &name) // <--- EDIT THIS LINE
+			rows.Scan(&first_name, &last_name) // <--- EDIT THIS LINE
 			// can't combine ints and strings in Go. Use strconv.Itoa(int) instead
-			table += "<tr><td>" + strconv.Itoa(id) + "</td><td>" + name + "</td></tr>" // <--- EDIT THIS LINE
+			table += "<tr><td>" + first_name + "</td><td>" + last_name + "</td></tr>" // <--- EDIT THIS LINE
 		}
 		// finally, close out the body and table
 		table += "</tbody></table>"
@@ -94,7 +90,7 @@ func main() {
 	router.GET("/query2", func(c *gin.Context) {
 		table := "<table class='table'><thead><tr>"
 		// put your query here
-		rows, err := db.Query("SELECT * FROM table1") // <--- EDIT THIS LINE
+		rows, err := db.Query("SELECT count(*) AS Number_Of_Tournaments_Won FROM Tournament JOIN player ON winnerId = player.playerId WHERE winnerId IN (SELECT playerId FROM Player WHERE player.first_name = 'Rory' AND player.last_name = 'Mcllroy') GROUP BY winnerId;") // <--- EDIT THIS LINE
 		if err != nil {
 			// careful about returning errors to the user!
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -110,9 +106,10 @@ func main() {
 		// once you've added all the columns in, close the header
 		table += "</thead><tbody>"
 		// columns
+		var Number_Of_Tournaments_Won string
 		for rows.Next() {
-			// rows.Scan() // put columns here prefaced with &
-			table += "<tr><td></td></tr>" // <--- EDIT THIS LINE
+			rows.Scan(&Number_Of_Tournaments_Won) // put columns here prefaced with &
+			table += "<tr><td>" + Number_Of_Tournaments_Won + "</td></tr>" // <--- EDIT THIS LINE
 		}
 		// finally, close out the body and table
 		table += "</tbody></table>"
@@ -122,7 +119,7 @@ func main() {
 	router.GET("/query3", func(c *gin.Context) {
 		table := "<table class='table'><thead><tr>"
 		// put your query here
-		rows, err := db.Query("SELECT * FROM table1") // <--- EDIT THIS LINE
+		rows, err := db.Query("SELECT sponsor.companey_name FROM Tournament JOIN player ON winnerId = player.playerId JOIN Sponsor ON tournament.sponsorId = sponsor.sponsorId WHERE player.first_name = 'Bubba' AND player.last_name = 'Watson';") // <--- EDIT THIS LINE
 		if err != nil {
 			// careful about returning errors to the user!
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -138,9 +135,10 @@ func main() {
 		// once you've added all the columns in, close the header
 		table += "</thead><tbody>"
 		// columns
+		var companey_name string
 		for rows.Next() {
-			// rows.Scan() // put columns here prefaced with &
-			table += "<tr><td></td></tr>" // <--- EDIT THIS LINE
+			rows.Scan(&companey_name) // put columns here prefaced with &
+			table += "<tr><td>" + companey_name + "</td></tr>" // <--- EDIT THIS LINE
 		}
 		// finally, close out the body and table
 		table += "</tbody></table>"
