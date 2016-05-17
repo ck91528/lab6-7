@@ -1,4 +1,4 @@
-// by setting package as main, Go will compile this as an executable file.
+	// by setting package as main, Go will compile this as an executable file.
 // Any other package turns this into a library
 package main
 
@@ -46,7 +46,7 @@ func main() {
 
 	router.GET("/ping", func(c *gin.Context) {
 		ping := db.Ping()
-		if ping != nil {
+		if ping != nil {	
 			// our site can't handle http status codes, but I'll still put them in cause why not
 			c.JSON(http.StatusOK, gin.H{"error": "true", "message": "db was not created. Check your DATABASE_URL"})
 		} else {
@@ -157,7 +157,10 @@ func main() {
 		username := c.PostForm("username")
 		password := c.PostForm("password")
 
-		rows, err := db.Query("SELECT usr.name FROM usr WHERE usr.name = '" + username + "' AND usr.password = '" + password + "';")
+		rows, err := db.Query("SELECT usr.name FROM usr WHERE (usr.name = $1 AND usr.password = $2);", username, password)
+
+		//rows, err := db.Query("SELECT usr.name FROM usr WHERE usr.name = '" + username + "' AND usr.password = '" + password + "';")
+
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
